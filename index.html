@@ -151,24 +151,23 @@
         }
         .gallery {
             display: flex;
-            overflow-x: auto;
+            flex-wrap: wrap;          /* 允许换行 */
             gap: 15px;
-            padding-bottom: 20px;
-            scroll-snap-type: x mandatory;
+            /* 移除 overflow-x 和 scroll-snap */
         }
         .gallery img {
-            height: 350px;
-            width: auto;
+            height: auto;             /* 高度自动，保持原始比例 */
+            width: calc(33.333% - 10px); /* 每行三张图片，减去间距 */
             object-fit: cover;
-            scroll-snap-align: start;
             border: 1px solid #eee;
         }
         .video-container {
-            margin-top: 30px;
             position: relative;
-            padding-bottom: 56.25%;
+            padding-bottom: 56.25%;   /* 保持 16:9，也可以改成 75% 等 */
             height: 0;
             overflow: hidden;
+            max-width: 800px;         /* 视频最大宽度，你可以改成 600px、900px 等 */
+            margin: 0 auto;           /* 水平居中 */
         }
         .video-container iframe {
             position: absolute;
