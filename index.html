@@ -151,23 +151,28 @@
         }
         .gallery {
             display: flex;
-            flex-wrap: wrap;          /* 允许换行 */
+            flex-wrap: wrap;
             gap: 15px;
-            /* 移除 overflow-x 和 scroll-snap */
         }
         .gallery img {
-            height: auto;             /* 高度自动，保持原始比例 */
-            width: calc(33.333% - 10px); /* 每行三张图片，减去间距 */
+            height: auto;
+            width: calc(33.333% - 10px);
             object-fit: cover;
             border: 1px solid #eee;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .gallery img:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
         }
         .video-container {
             position: relative;
-            padding-bottom: 56.25%;   /* 保持 16:9，也可以改成 75% 等 */
+            padding-bottom: 56.25%;
             height: 0;
             overflow: hidden;
-            max-width: 800px;         /* 视频最大宽度，你可以改成 600px、900px 等 */
-            margin: 0 auto;           /* 水平居中 */
+            max-width: 800px;
+            margin: 0 auto;
         }
         .video-container iframe {
             position: absolute;
@@ -180,6 +185,51 @@
         .no-video {
             color: #999;
             font-style: italic;
+        }
+
+        /* ========== 模态框（图片放大查看） ========== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            animation: fadeIn 0.25s ease;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            max-width: 90vw;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 4px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            cursor: default;
+        }
+        .modal-close {
+            position: fixed;
+            top: 30px;
+            right: 40px;
+            font-size: 3rem;
+            color: #fff;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            line-height: 1;
+            z-index: 10000;
+        }
+        .modal-close:hover {
+            opacity: 0.6;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         /* ========== 关于我 ========== */
@@ -255,6 +305,20 @@
             #home h1 {
                 font-size: 2.5rem;
             }
+            .gallery img {
+                width: calc(50% - 10px);
+            }
+            .modal-close {
+                top: 20px;
+                right: 25px;
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .gallery img {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -275,6 +339,12 @@
             </div>
         </div>
     </nav>
+
+    <!-- 模态框（图片放大查看） -->
+    <div class="modal-overlay" id="imageModal" onclick="closeModal(event)">
+        <span class="modal-close" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="modalImage" src="" alt="放大查看">
+    </div>
 
     <!-- 首页 -->
     <section id="home">
@@ -352,7 +422,7 @@
                     "images/tbrender_Viewport_009.png",
                     "images/tbrender_Viewport_011.png",
                 ],
-                video: "https://www.youtube.com/embed/dQw4w9WgXcQ"  // 替换为你的视频嵌入链接，或留空字符串 "" 表示没有视频
+                video: "https://www.youtube.com/embed/dQw4w9WgXcQ"
             },
             {
                 name: "中世纪城镇",
@@ -373,13 +443,41 @@
                 ],
                 video: "https://www.youtube.com/embed/dQw4w9WgXcQ"
             }
-            // 可以继续添加更多作品...
         ];
         // ============================================================
 
         const workList = document.getElementById('workList');
         const workDetail = document.getElementById('workDetail');
         let currentIndex = 0;
+
+        // 模态框元素
+        const modalOverlay = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+
+        // 打开模态框
+        function openModal(src) {
+            modalImage.src = src;
+            modalOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 关闭模态框
+        function closeModal(event) {
+            // 如果点击的是模态框背景（overlay）或者关闭按钮，则关闭
+            if (event && event.target !== modalOverlay && event.target !== modalImage) {
+                // 如果点击的是图片本身，不关闭
+                if (event.target.tagName === 'IMG') return;
+            }
+            modalOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // 键盘 ESC 键关闭
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modalOverlay.classList.contains('active')) {
+                closeModal();
+            }
+        });
 
         // 生成作品名按钮
         function renderWorkList() {
@@ -412,10 +510,10 @@
             let html = `<div class="work-title">${work.name}</div>`;
             html += `<p style="margin-bottom:20px; color:#555;">${work.description}</p>`;
 
-            // 图片画廊
+            // 图片画廊 —— 给每张图片添加点击事件
             html += `<div class="gallery">`;
             work.images.forEach(img => {
-                html += `<img src="${img}" alt="${work.name}">`;
+                html += `<img src="${img}" alt="${work.name}" onclick="openModal('${img}')">`;
             });
             html += `</div>`;
 
