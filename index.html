@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的作品集 - 游戏场景编辑</title>
+    <style>
+        /* ========== 全局样式 ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #ffffff;
+            color: #111111;
+            line-height: 1.6;
+        }
+        a {
+            color: #111;
+            text-decoration: none;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        section {
+            padding: 80px 0;
+        }
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 40px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #111;
+            display: inline-block;
+            padding-bottom: 10px;
+        }
+
+        /* ========== 导航栏 ========== */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(255,255,255,0.95);
+            border-bottom: 1px solid #eee;
+            z-index: 1000;
+        }
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+        }
+        .logo {
+            font-weight: bold;
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+        }
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+        .nav-links li {
+            margin-left: 30px;
+        }
+        .nav-links a {
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            transition: opacity 0.3s;
+        }
+        .nav-links a:hover {
+            opacity: 0.5;
+        }
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+        }
+        .menu-toggle span {
+            width: 25px;
+            height: 2px;
+            background: #111;
+            margin: 3px 0;
+            transition: 0.3s;
+        }
+
+        /* ========== 首页 ========== */
+        #home {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: #fafafa;
+        }
+        #home h1 {
+            font-size: 4rem;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+        #home p {
+            font-size: 1.2rem;
+            color: #555;
+        }
+
+        /* ========== 作品展示 ========== */
+        .works-layout {
+            display: flex;
+            gap: 40px;
+            margin-top: 20px;
+        }
+        .work-list {
+            flex: 1;
+            min-width: 200px;
+            border-right: 1px solid #ddd;
+            padding-right: 20px;
+        }
+        .work-list button {
+            display: block;
+            width: 100%;
+            padding: 15px 10px;
+            margin-bottom: 5px;
+            background: none;
+            border: none;
+            text-align: left;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            color: #111;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+        .work-list button:hover,
+        .work-list button.active {
+            border-left: 3px solid #111;
+            background: #f5f5f5;
+            font-weight: bold;
+        }
+        .work-detail {
+            flex: 3;
+        }
+        .work-title {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+        .gallery {
+            display: flex;
+            overflow-x: auto;
+            gap: 15px;
+            padding-bottom: 20px;
+            scroll-snap-type: x mandatory;
+        }
+        .gallery img {
+            height: 350px;
+            width: auto;
+            object-fit: cover;
+            scroll-snap-align: start;
+            border: 1px solid #eee;
+        }
+        .video-container {
+            margin-top: 30px;
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .no-video {
+            color: #999;
+            font-style: italic;
+        }
+
+        /* ========== 关于我 ========== */
+        #about p {
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin-bottom: 20px;
+            color: #444;
+        }
+
+        /* ========== 联系方式 ========== */
+        #contact .contact-info {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+        }
+        .contact-item a {
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.3s;
+        }
+        .contact-item a:hover {
+            border-bottom-color: #111;
+        }
+
+        /* ========== 响应式 ========== */
+        @media (max-width: 768px) {
+            .nav-links {
+                position: fixed;
+                top: 60px;
+                right: -100%;
+                width: 100%;
+                height: calc(100vh - 60px);
+                background: white;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                transition: right 0.3s;
+            }
+            .nav-links.active {
+                right: 0;
+            }
+            .nav-links li {
+                margin: 20px 0;
+            }
+            .menu-toggle {
+                display: flex;
+            }
+            .works-layout {
+                flex-direction: column;
+            }
+            .work-list {
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+                padding-bottom: 15px;
+            }
+            .work-list button {
+                display: inline-block;
+                width: auto;
+                margin-right: 10px;
+                border-left: none;
+                border-bottom: 3px solid transparent;
+            }
+            .work-list button.active {
+                border-left: none;
+                border-bottom: 3px solid #111;
+            }
+            #home h1 {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 导航栏 -->
+    <nav>
+        <div class="container">
+            <div class="logo">PORTFOLIO</div>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#home">首页</a></li>
+                <li><a href="#works">作品展示</a></li>
+                <li><a href="#about">关于我</a></li>
+                <li><a href="#contact">联系方式</a></li>
+            </ul>
+            <div class="menu-toggle" id="menuToggle" onclick="toggleMenu()">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 首页 -->
+    <section id="home">
+        <div>
+            <h1>游戏场景编辑</h1>
+            <p>展示我的场景作品 - 图片与视频</p>
+        </div>
+    </section>
+
+    <!-- 作品展示 -->
+    <section id="works">
+        <div class="container">
+            <h2>作品展示</h2>
+            <div class="works-layout">
+                <div class="work-list" id="workList">
+                    <!-- 作品名按钮由JS动态生成 -->
+                </div>
+                <div class="work-detail" id="workDetail">
+                    <!-- 当前作品的详细内容（标题、图片、视频）由JS动态生成 -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 关于我 -->
+    <section id="about">
+        <div class="container">
+            <h2>关于我</h2>
+            <p>你好，我是一名游戏场景编辑师，专注于构建沉浸式的游戏世界。熟练使用 Unity、Unreal Engine、Maya、Blender 等工具，擅长场景布局、灯光渲染和资产整合。</p>
+            <p>我热爱通过环境叙事来增强游戏体验，参与过多个独立游戏项目。欢迎浏览我的作品，如有合作意向请通过联系方式与我取得联系。</p>
+        </div>
+    </section>
+
+    <!-- 联系方式 -->
+    <section id="contact">
+        <div class="container">
+            <h2>联系方式</h2>
+            <div class="contact-info">
+                <div class="contact-item">
+                    <span>📧</span>
+                    <a href="mailto:yourname@example.com">yourname@example.com</a>
+                </div>
+                <div class="contact-item">
+                    <span>🔗</span>
+                    <a href="https://www.artstation.com/yourprofile" target="_blank">ArtStation</a>
+                </div>
+                <div class="contact-item">
+                    <span>💼</span>
+                    <a href="https://www.linkedin.com/in/yourprofile" target="_blank">LinkedIn</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // ================== 在这里修改你的作品数据 ==================
+        const worksData = [
+            {
+                name: "废弃工厂",
+                description: "一个后末日风格的废弃工厂场景，包含大量自定义资产和动态光照。",
+                images: [
+                    "https://picsum.photos/800/500?random=1",
+                    "https://picsum.photos/800/500?random=2",
+                    "https://picsum.photos/800/500?random=3"
+                ],
+                video: "https://www.youtube.com/embed/dQw4w9WgXcQ"  // 替换为你的视频嵌入链接，或留空字符串 "" 表示没有视频
+            },
+            {
+                name: "中世纪城镇",
+                description: "一个充满细节的中世纪小镇，突出建筑布局和氛围营造。",
+                images: [
+                    "https://picsum.photos/800/500?random=4",
+                    "https://picsum.photos/800/500?random=5"
+                ],
+                video: ""
+            },
+            {
+                name: "科幻空间站",
+                description: "硬表面建模为主的科幻场景，强调灯光和材质表现。",
+                images: [
+                    "https://picsum.photos/800/500?random=6",
+                    "https://picsum.photos/800/500?random=7",
+                    "https://picsum.photos/800/500?random=8"
+                ],
+                video: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+            }
+            // 可以继续添加更多作品...
+        ];
+        // ============================================================
+
+        const workList = document.getElementById('workList');
+        const workDetail = document.getElementById('workDetail');
+        let currentIndex = 0;
+
+        // 生成作品名按钮
+        function renderWorkList() {
+            workList.innerHTML = '';
+            worksData.forEach((work, index) => {
+                const btn = document.createElement('button');
+                btn.textContent = work.name;
+                btn.classList.add('work-btn');
+                if (index === currentIndex) btn.classList.add('active');
+                btn.addEventListener('click', () => {
+                    currentIndex = index;
+                    updateActiveButton();
+                    renderWorkDetail(index);
+                });
+                workList.appendChild(btn);
+            });
+        }
+
+        function updateActiveButton() {
+            const buttons = document.querySelectorAll('.work-btn');
+            buttons.forEach((btn, i) => {
+                if (i === currentIndex) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+        }
+
+        // 渲染当前作品的详情
+        function renderWorkDetail(index) {
+            const work = worksData[index];
+            let html = `<div class="work-title">${work.name}</div>`;
+            html += `<p style="margin-bottom:20px; color:#555;">${work.description}</p>`;
+
+            // 图片画廊
+            html += `<div class="gallery">`;
+            work.images.forEach(img => {
+                html += `<img src="${img}" alt="${work.name}">`;
+            });
+            html += `</div>`;
+
+            // 视频
+            if (work.video && work.video.trim() !== '') {
+                html += `<div class="video-container"><iframe src="${work.video}" allowfullscreen></iframe></div>`;
+            } else {
+                html += `<p class="no-video">（暂无视频）</p>`;
+            }
+
+            workDetail.innerHTML = html;
+        }
+
+        // 移动端菜单切换
+        function toggleMenu() {
+            document.getElementById('navLinks').classList.toggle('active');
+        }
+
+        // 点击导航链接后关闭移动端菜单
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                document.getElementById('navLinks').classList.remove('active');
+            });
+        });
+
+        // 初始化
+        renderWorkList();
+        renderWorkDetail(0);
+    </script>
+</body>
+</html>
