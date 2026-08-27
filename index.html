@@ -201,38 +201,21 @@
             100% { transform: translateX(-50%); }
         }
 
-        .carousel-controls {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            padding: 12px 0 5px;
+        /* 滚动提示文字 */
+        .scroll-hint {
+            text-align: center;
+            color: #999;
+            font-size: 0.85rem;
+            padding: 6px 0 12px;
+            letter-spacing: 1px;
         }
-        .carousel-controls button {
-            background: #111;
-            color: #fff;
-            border: none;
-            padding: 8px 24px;
-            border-radius: 30px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            letter-spacing: 0.5px;
+        .scroll-hint span {
+            display: inline-block;
+            animation: pulse 2s ease-in-out infinite;
         }
-        .carousel-controls button:hover {
-            background: #333;
-            transform: scale(1.02);
-        }
-        .carousel-controls button.pause-btn {
-            background: #e74c3c;
-        }
-        .carousel-controls button.pause-btn:hover {
-            background: #c0392b;
-        }
-        .carousel-controls button.play-btn {
-            background: #2ecc71;
-        }
-        .carousel-controls button.play-btn:hover {
-            background: #27ae60;
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
         }
 
         /* ========== 全屏轮播模态框 ========== */
@@ -267,6 +250,7 @@
             border-radius: 4px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.5);
             transition: opacity 0.25s ease;
+            cursor: default;
         }
         .carousel-counter {
             position: absolute;
@@ -497,7 +481,7 @@
     </nav>
 
     <!-- 全屏轮播模态框 -->
-    <div class="carousel-overlay" id="carouselOverlay" onclick="closeCarousel(event)">
+    <div class="carousel-overlay" id="carouselOverlay">
         <span class="carousel-close" onclick="closeCarousel()">&times;</span>
         <div class="carousel-container">
             <button class="carousel-nav prev" id="carouselPrev" onclick="changeCarousel(-1)">‹</button>
@@ -562,10 +546,10 @@
 
     <script>
         // ============================================================
-        // ✅ 修复1: 图片链接已修正为 https://（去掉了多余的 "i"）
-        // ✅ 修复2: 点击图片打开全屏轮播功能正常
-        // ✅ 修复3: 视频宽度与图片轮播一致（都是 max-width: 900px）
-        // ✅ 修复4: 自动滚动 + 暂停/播放 + 鼠标悬停暂停
+        // ✅ 图片链接已修正为 https://
+        // ✅ 点击图片打开全屏轮播（使用全局函数）
+        // ✅ 视频宽度与图片轮播一致（max-width: 900px）
+        // ✅ 自动滚动 + 鼠标悬停暂停（无暂停按钮）
         // ============================================================
 
         const worksData = [
@@ -616,46 +600,57 @@
         const workDetail = document.getElementById('workDetail');
         let currentIndex = 0;
 
-        // ===== 全屏轮播 =====
+        // ===== 全屏轮播（全局函数，供 onclick 调用） =====
         const carouselOverlay = document.getElementById('carouselOverlay');
         const carouselImage = document.getElementById('carouselImage');
         const carouselCounter = document.getElementById('carouselCounter');
+        const carouselPrev = document.getElementById('carouselPrev');
+        const carouselNext = document.getElementById('carouselNext');
         let currentCarouselImages = [];
         let currentCarouselIndex = 0;
 
-        function openCarousel(images, startIndex) {
+        // 打开全屏轮播 - 全局函数
+        window.openCarousel = function(images, startIndex) {
             if (!images || images.length === 0) return;
             currentCarouselImages = images;
             currentCarouselIndex = startIndex;
-            updateCarousel();
+            updateCarouselDisplay();
             carouselOverlay.classList.add('active');
             document.body.style.overflow = 'hidden';
-        }
+        };
 
-        function closeCarousel(event) {
+        // 关闭全屏轮播
+        window.closeCarousel = function(event) {
             if (event && event.target !== carouselOverlay && event.target.tagName !== 'IMG') {
                 return;
             }
             carouselOverlay.classList.remove('active');
             document.body.style.overflow = '';
-        }
+        };
 
-        function changeCarousel(direction) {
+        // 切换图片
+        window.changeCarousel = function(direction) {
             const len = currentCarouselImages.length;
             if (len === 0) return;
             currentCarouselIndex = (currentCarouselIndex + direction + len) % len;
-            updateCarousel();
-        }
+            updateCarouselDisplay();
+        };
 
-        function updateCarousel() {
+        function updateCarouselDisplay() {
             const len = currentCarouselImages.length;
             if (len === 0) return;
             carouselImage.src = currentCarouselImages[currentCarouselIndex];
             carouselCounter.textContent = `${currentCarouselIndex + 1} / ${len}`;
-            
-            document.getElementById('carouselPrev').classList.toggle('hidden', len <= 1);
-            document.getElementById('carouselNext').classList.toggle('hidden', len <= 1);
+            carouselPrev.classList.toggle('hidden', len <= 1);
+            carouselNext.classList.toggle('hidden', len <= 1);
         }
+
+        // 点击背景关闭
+        carouselOverlay.addEventListener('click', function(e) {
+            if (e.target === carouselOverlay) {
+                closeCarousel();
+            }
+        });
 
         // 键盘控制
         document.addEventListener('keydown', function(e) {
@@ -684,7 +679,7 @@
             });
         }
 
-        // ===== 设置自动滚动 =====
+        // ===== 设置自动滚动（无暂停按钮） =====
         function setupAutoScroll(container) {
             const track = container.querySelector('.gallery-track');
             if (!track) return;
@@ -693,46 +688,20 @@
             const duration = Math.max(20, totalItems * 2);
             track.style.animationDuration = duration + 's';
 
-            const pauseBtn = container.querySelector('.pause-btn');
-            const playBtn = container.querySelector('.play-btn');
-
-            function pauseScroll() {
-                track.classList.add('paused');
-                if (pauseBtn) { pauseBtn.style.display = 'none'; }
-                if (playBtn) { playBtn.style.display = 'inline-block'; }
-            }
-
-            function playScroll() {
-                track.classList.remove('paused');
-                if (playBtn) { playBtn.style.display = 'none'; }
-                if (pauseBtn) { pauseBtn.style.display = 'inline-block'; }
-            }
-
-            if (pauseBtn) pauseBtn.addEventListener('click', pauseScroll);
-            if (playBtn) playBtn.addEventListener('click', playScroll);
-
             // 鼠标悬停暂停
             track.addEventListener('mouseenter', () => {
-                if (!track.classList.contains('paused')) {
-                    track.style.animationPlayState = 'paused';
-                }
+                track.style.animationPlayState = 'paused';
             });
             track.addEventListener('mouseleave', () => {
-                if (!track.classList.contains('paused')) {
-                    track.style.animationPlayState = 'running';
-                }
+                track.style.animationPlayState = 'running';
             });
 
-            // 触屏支持
+            // 触屏支持：触摸时暂停
             track.addEventListener('touchstart', () => {
-                if (!track.classList.contains('paused')) {
-                    track.style.animationPlayState = 'paused';
-                }
+                track.style.animationPlayState = 'paused';
             });
             track.addEventListener('touchend', () => {
-                if (!track.classList.contains('paused')) {
-                    track.style.animationPlayState = 'running';
-                }
+                track.style.animationPlayState = 'running';
             });
         }
 
@@ -746,18 +715,17 @@
             if (work.images && work.images.length > 0) {
                 html += `<div class="gallery-carousel">`;
                 html += `<div class="gallery-track">`;
+                // 复制两份实现无缝循环
                 const doubled = [...work.images, ...work.images];
                 doubled.forEach((img, i) => {
                     const originalIndex = i % work.images.length;
+                    // 使用 onclick 调用全局函数 openCarousel
                     html += `<div class="gallery-item" onclick="openCarousel(${JSON.stringify(work.images)}, ${originalIndex})">`;
                     html += `<img src="${img}" alt="${work.name}" loading="lazy">`;
                     html += `</div>`;
                 });
                 html += `</div>`;
-                html += `<div class="carousel-controls">`;
-                html += `<button class="pause-btn">⏸ 暂停</button>`;
-                html += `<button class="play-btn" style="display:none;">▶ 播放</button>`;
-                html += `</div>`;
+                html += `<div class="scroll-hint"><span>🖱 悬停暂停 · 点击查看大图</span></div>`;
                 html += `</div>`;
             } else {
                 html += `<p style="color:#999; margin-bottom:20px;">（暂无图片）</p>`;
