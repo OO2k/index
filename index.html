@@ -149,30 +149,205 @@
             margin-bottom: 20px;
             letter-spacing: 1px;
         }
-        .gallery {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
+
+        /* ========== 图片滚动画廊 ========== */
+        .gallery-scroll {
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            background: #f8f8f8;
         }
-        .gallery img {
-            height: auto;
-            width: calc(33.333% - 10px);
-            object-fit: cover;
-            border: 1px solid #eee;
+        .gallery-track {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 15px 10px;
+            scroll-behavior: smooth;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            cursor: grab;
+        }
+        .gallery-track:active {
+            cursor: grabbing;
+        }
+        .gallery-track::-webkit-scrollbar {
+            height: 6px;
+        }
+        .gallery-track::-webkit-scrollbar-track {
+            background: #e0e0e0;
+            border-radius: 3px;
+        }
+        .gallery-track::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+        .gallery-track::-webkit-scrollbar-thumb:hover {
+            background: #666;
+        }
+        .gallery-item {
+            flex: 0 0 280px;
+            height: 200px;
+            scroll-snap-align: start;
+            border-radius: 6px;
+            overflow: hidden;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
+            border: 2px solid transparent;
         }
-        .gallery img:hover {
-            transform: scale(1.02);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        .gallery-item:hover {
+            transform: scale(1.03);
+            box-shadow: 0 6px 25px rgba(0,0,0,0.15);
+            border-color: #111;
         }
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .scroll-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.9);
+            border: 1px solid #ddd;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            z-index: 10;
+            color: #333;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            user-select: none;
+        }
+        .scroll-arrow:hover {
+            background: #fff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transform: translateY(-50%) scale(1.05);
+        }
+        .scroll-arrow.left {
+            left: 10px;
+        }
+        .scroll-arrow.right {
+            right: 10px;
+        }
+        .scroll-arrow.hidden {
+            display: none;
+        }
+
+        /* ========== 全屏轮播模态框 ========== */
+        .carousel-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.92);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+        .carousel-overlay.active {
+            display: flex;
+        }
+        .carousel-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .carousel-image {
+            max-width: 90vw;
+            max-height: 85vh;
+            object-fit: contain;
+            border-radius: 4px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            transition: opacity 0.25s ease;
+        }
+        .carousel-counter {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255,255,255,0.8);
+            font-size: 1rem;
+            background: rgba(0,0,0,0.5);
+            padding: 8px 20px;
+            border-radius: 20px;
+            backdrop-filter: blur(8px);
+            letter-spacing: 1px;
+        }
+        .carousel-close {
+            position: fixed;
+            top: 25px;
+            right: 35px;
+            font-size: 3rem;
+            color: #fff;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            line-height: 1;
+            z-index: 10000;
+            opacity: 0.8;
+        }
+        .carousel-close:hover {
+            opacity: 0.5;
+        }
+        .carousel-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 50%;
+            width: 56px;
+            height: 56px;
+            font-size: 2rem;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.25s;
+            user-select: none;
+        }
+        .carousel-nav:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-50%) scale(1.05);
+        }
+        .carousel-nav.prev {
+            left: 25px;
+        }
+        .carousel-nav.next {
+            right: 25px;
+        }
+        .carousel-nav.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* ========== 视频容器 ========== */
         .video-container {
             position: relative;
             padding-bottom: 56.25%;
             height: 0;
             overflow: hidden;
             max-width: 800px;
-            margin: 0 auto;
+            margin: 20px auto 0;
         }
         .video-container iframe {
             position: absolute;
@@ -185,51 +360,8 @@
         .no-video {
             color: #999;
             font-style: italic;
-        }
-
-        /* ========== 模态框（图片放大查看） ========== */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.85);
-            z-index: 9999;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            animation: fadeIn 0.25s ease;
-        }
-        .modal-overlay.active {
-            display: flex;
-        }
-        .modal-content {
-            max-width: 90vw;
-            max-height: 90vh;
-            object-fit: contain;
-            border-radius: 4px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-            cursor: default;
-        }
-        .modal-close {
-            position: fixed;
-            top: 30px;
-            right: 40px;
-            font-size: 3rem;
-            color: #fff;
-            cursor: pointer;
-            transition: opacity 0.2s;
-            line-height: 1;
-            z-index: 10000;
-        }
-        .modal-close:hover {
-            opacity: 0.6;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            text-align: center;
+            margin-top: 10px;
         }
 
         /* ========== 关于我 ========== */
@@ -305,19 +437,42 @@
             #home h1 {
                 font-size: 2.5rem;
             }
-            .gallery img {
-                width: calc(50% - 10px);
+            .gallery-item {
+                flex: 0 0 200px;
+                height: 150px;
             }
-            .modal-close {
-                top: 20px;
-                right: 25px;
+            .carousel-nav {
+                width: 44px;
+                height: 44px;
+                font-size: 1.5rem;
+            }
+            .carousel-nav.prev {
+                left: 10px;
+            }
+            .carousel-nav.next {
+                right: 10px;
+            }
+            .carousel-close {
+                top: 15px;
+                right: 20px;
                 font-size: 2.5rem;
+            }
+            .carousel-counter {
+                bottom: 20px;
+                font-size: 0.85rem;
+                padding: 6px 16px;
             }
         }
 
         @media (max-width: 480px) {
-            .gallery img {
-                width: 100%;
+            .gallery-item {
+                flex: 0 0 160px;
+                height: 120px;
+            }
+            .scroll-arrow {
+                width: 30px;
+                height: 30px;
+                font-size: 1rem;
             }
         }
     </style>
@@ -340,10 +495,15 @@
         </div>
     </nav>
 
-    <!-- 模态框（图片放大查看） -->
-    <div class="modal-overlay" id="imageModal" onclick="closeModal(event)">
-        <span class="modal-close" onclick="closeModal()">&times;</span>
-        <img class="modal-content" id="modalImage" src="" alt="放大查看">
+    <!-- 全屏轮播模态框 -->
+    <div class="carousel-overlay" id="carouselOverlay" onclick="closeCarousel(event)">
+        <span class="carousel-close" onclick="closeCarousel()">&times;</span>
+        <div class="carousel-container">
+            <button class="carousel-nav prev" id="carouselPrev" onclick="changeCarousel(-1)">‹</button>
+            <img class="carousel-image" id="carouselImage" src="" alt="作品图片">
+            <button class="carousel-nav next" id="carouselNext" onclick="changeCarousel(1)">›</button>
+            <div class="carousel-counter" id="carouselCounter">1 / 1</div>
+        </div>
     </div>
 
     <!-- 首页 -->
@@ -400,29 +560,29 @@
     </section>
 
     <script>
-        // ================== 在这里修改你的作品数据 ==================
+        // ================== 作品数据 ==================
         const worksData = [
             {
                 name: "对马岛场景练习",
                 description: "一个对马岛的场景练习，包含大量自定义资产和动态光照。",
                 images: [
-                   "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/11.png",
-                   "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/HighresScreenshot00015.png",
-                   "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/HighresScreenshot00016.png",
-                   "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/box.png",
-                   "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/stone.png",
-                   "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/tbrender_Viewport.png",
-                   "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/tbrender_Viewport_001.png",
-                   "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/tbrender_Viewport_002.png",
-                   "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/tbrender_Viewport_003.png",
-                   "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/tbrender_Viewport_004.png",
-                   "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/tbrender_Viewport_005.png",
-                   "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/tbrender_Viewport_006.png",
-                   "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/tbrender_Viewport_007.png",
-                   "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/tbrender_Viewport_009.png",
-                   "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/tbrender_Viewport_011.png",
+                    "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/11.png",
+                    "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/HighresScreenshot00015.png",
+                    "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/HighresScreenshot00016.png",
+                    "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/box.png",
+                    "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/stone.png",
+                    "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/tbrender_Viewport.png",
+                    "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/tbrender_Viewport_001.png",
+                    "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/tbrender_Viewport_002.png",
+                    "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/tbrender_Viewport_003.png",
+                    "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/tbrender_Viewport_004.png",
+                    "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/tbrender_Viewport_005.png",
+                    "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/tbrender_Viewport_006.png",
+                    "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/tbrender_Viewport_007.png",
+                    "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/tbrender_Viewport_009.png",
+                    "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/tbrender_Viewport_011.png",
                 ],
-                video: "https://www.bilibili.com/video/BV1tc8Z6XEH6/?vd_source=ba8b9b7ed0d7ecc5346c2f5893253906"
+                video: "https://player.bilibili.com/player.html?isOutside=true&aid=117162731702950&bvid=BV1tc8Z6XEH6&cid=41299675854&p=1"
             },
             {
                 name: "中世纪城镇",
@@ -441,7 +601,7 @@
                     "https://picsum.photos/800/500?random=7",
                     "https://picsum.photos/800/500?random=8"
                 ],
-                video: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+                video: "https://player.bilibili.com/player.html?isOutside=true&aid=117162731702950&bvid=BV1tc8Z6XEH6&cid=41299675854&p=1"
             }
         ];
         // ============================================================
@@ -450,36 +610,69 @@
         const workDetail = document.getElementById('workDetail');
         let currentIndex = 0;
 
-        // 模态框元素
-        const modalOverlay = document.getElementById('imageModal');
-        const modalImage = document.getElementById('modalImage');
+        // ===== 轮播相关变量 =====
+        const carouselOverlay = document.getElementById('carouselOverlay');
+        const carouselImage = document.getElementById('carouselImage');
+        const carouselCounter = document.getElementById('carouselCounter');
+        const carouselPrev = document.getElementById('carouselPrev');
+        const carouselNext = document.getElementById('carouselNext');
+        let currentCarouselImages = [];
+        let currentCarouselIndex = 0;
 
-        // 打开模态框
-        function openModal(src) {
-            modalImage.src = src;
-            modalOverlay.classList.add('active');
+        // ===== 打开全屏轮播 =====
+        function openCarousel(images, startIndex) {
+            if (!images || images.length === 0) return;
+            currentCarouselImages = images;
+            currentCarouselIndex = startIndex;
+            updateCarousel();
+            carouselOverlay.classList.add('active');
             document.body.style.overflow = 'hidden';
         }
 
-        // 关闭模态框
-        function closeModal(event) {
-            // 如果点击的是模态框背景（overlay）或者关闭按钮，则关闭
-            if (event && event.target !== modalOverlay && event.target !== modalImage) {
-                // 如果点击的是图片本身，不关闭
-                if (event.target.tagName === 'IMG') return;
+        // ===== 关闭轮播 =====
+        function closeCarousel(event) {
+            if (event && event.target !== carouselOverlay && event.target.tagName !== 'IMG') {
+                return;
             }
-            modalOverlay.classList.remove('active');
+            carouselOverlay.classList.remove('active');
             document.body.style.overflow = '';
         }
 
-        // 键盘 ESC 键关闭
+        // ===== 切换轮播图片 =====
+        function changeCarousel(direction) {
+            const len = currentCarouselImages.length;
+            if (len === 0) return;
+            currentCarouselIndex = (currentCarouselIndex + direction + len) % len;
+            updateCarousel();
+        }
+
+        // ===== 更新轮播显示 =====
+        function updateCarousel() {
+            const len = currentCarouselImages.length;
+            if (len === 0) return;
+            carouselImage.src = currentCarouselImages[currentCarouselIndex];
+            carouselCounter.textContent = `${currentCarouselIndex + 1} / ${len}`;
+            
+            // 控制导航按钮显示
+            carouselPrev.classList.toggle('hidden', len <= 1);
+            carouselNext.classList.toggle('hidden', len <= 1);
+        }
+
+        // ===== 键盘控制轮播 =====
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && modalOverlay.classList.contains('active')) {
-                closeModal();
+            if (!carouselOverlay.classList.contains('active')) return;
+            if (e.key === 'Escape') {
+                closeCarousel();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                changeCarousel(-1);
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                changeCarousel(1);
             }
         });
 
-        // 生成作品名按钮
+        // ===== 生成作品名按钮 =====
         function renderWorkList() {
             workList.innerHTML = '';
             worksData.forEach((work, index) => {
@@ -504,42 +697,91 @@
             });
         }
 
-        // 渲染当前作品的详情
+        // ===== 滚动画廊：左右箭头控制 =====
+        function setupGalleryScroll(container) {
+            const track = container.querySelector('.gallery-track');
+            const leftArrow = container.querySelector('.scroll-arrow.left');
+            const rightArrow = container.querySelector('.scroll-arrow.right');
+            if (!track) return;
+
+            function updateArrowVisibility() {
+                const scrollLeft = track.scrollLeft;
+                const maxScroll = track.scrollWidth - track.clientWidth;
+                if (leftArrow) leftArrow.classList.toggle('hidden', scrollLeft <= 5);
+                if (rightArrow) rightArrow.classList.toggle('hidden', scrollLeft >= maxScroll - 5);
+            }
+
+            if (leftArrow) {
+                leftArrow.addEventListener('click', () => {
+                    track.scrollBy({ left: -300, behavior: 'smooth' });
+                    setTimeout(updateArrowVisibility, 300);
+                });
+            }
+            if (rightArrow) {
+                rightArrow.addEventListener('click', () => {
+                    track.scrollBy({ left: 300, behavior: 'smooth' });
+                    setTimeout(updateArrowVisibility, 300);
+                });
+            }
+
+            track.addEventListener('scroll', updateArrowVisibility);
+            // 初始更新
+            setTimeout(updateArrowVisibility, 100);
+            // 窗口大小变化时重新检查
+            window.addEventListener('resize', updateArrowVisibility);
+        }
+
+        // ===== 渲染作品详情 =====
         function renderWorkDetail(index) {
             const work = worksData[index];
             let html = `<div class="work-title">${work.name}</div>`;
             html += `<p style="margin-bottom:20px; color:#555;">${work.description}</p>`;
 
-            // 图片画廊 —— 给每张图片添加点击事件
-            html += `<div class="gallery">`;
-            work.images.forEach(img => {
-                html += `<img src="${img}" alt="${work.name}" onclick="openModal('${img}')">`;
-            });
-            html += `</div>`;
+            // ===== 滚动画廊 =====
+            if (work.images && work.images.length > 0) {
+                html += `<div class="gallery-scroll">`;
+                html += `<button class="scroll-arrow left hidden">‹</button>`;
+                html += `<div class="gallery-track" id="galleryTrack">`;
+                work.images.forEach((img, imgIndex) => {
+                    html += `<div class="gallery-item" onclick="openCarousel(${JSON.stringify(work.images)}, ${imgIndex})">`;
+                    html += `<img src="${img}" alt="${work.name} - ${imgIndex + 1}" loading="lazy">`;
+                    html += `</div>`;
+                });
+                html += `</div>`;
+                html += `<button class="scroll-arrow right">›</button>`;
+                html += `</div>`;
+            } else {
+                html += `<p style="color:#999; margin-bottom:20px;">（暂无图片）</p>`;
+            }
 
-            // 视频
+            // ===== 视频 =====
             if (work.video && work.video.trim() !== '') {
-                html += `<div class="video-container"><iframe src="${work.video}" allowfullscreen></iframe></div>`;
+                html += `<div class="video-container"><iframe src="${work.video}" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe></div>`;
             } else {
                 html += `<p class="no-video">（暂无视频）</p>`;
             }
 
             workDetail.innerHTML = html;
+
+            // 绑定滚动画廊的箭头控制
+            const galleryContainer = document.querySelector('.gallery-scroll');
+            if (galleryContainer) {
+                setupGalleryScroll(galleryContainer);
+            }
         }
 
-        // 移动端菜单切换
+        // ===== 移动端菜单切换 =====
         function toggleMenu() {
             document.getElementById('navLinks').classList.toggle('active');
         }
 
-        // 点击导航链接后关闭移动端菜单
         document.querySelectorAll('.nav-links a').forEach(link => {
             link.addEventListener('click', () => {
                 document.getElementById('navLinks').classList.remove('active');
             });
         });
 
-        // 初始化
+        // ===== 初始化 =====
         renderWorkList();
         renderWorkDetail(0);
     </script>
