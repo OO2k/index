@@ -546,12 +546,8 @@
 
     <script>
         // ============================================================
-        // ✅ 图片链接已修正为 https://
-        // ✅ 点击图片打开全屏轮播（使用全局函数）
-        // ✅ 视频宽度与图片轮播一致（max-width: 900px）
-        // ✅ 自动滚动 + 鼠标悬停暂停（无暂停按钮）
+        // 作品数据 - 在这里修改你的作品信息
         // ============================================================
-
         const worksData = [
             {
                 name: "对马岛场景练习",
@@ -571,7 +567,7 @@
                     "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/tbrender_Viewport_006.png",
                     "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/tbrender_Viewport_007.png",
                     "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/tbrender_Viewport_009.png",
-                    "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/tbrender_Viewport_011.png",
+                    "https://myportfolio-1475690053.cos.ap-guangzhou.myqcloud.com/tbrender_Viewport_011.png"
                 ],
                 video: "https://player.bilibili.com/player.html?isOutside=true&aid=117162731702950&bvid=BV1tc8Z6XEH6&cid=41299675854&p=1"
             },
@@ -596,51 +592,50 @@
             }
         ];
 
+        // ============================================================
+        // 获取DOM元素
+        // ============================================================
         const workList = document.getElementById('workList');
         const workDetail = document.getElementById('workDetail');
-        let currentIndex = 0;
-
-        // ===== 全屏轮播（全局函数，供 onclick 调用） =====
         const carouselOverlay = document.getElementById('carouselOverlay');
         const carouselImage = document.getElementById('carouselImage');
         const carouselCounter = document.getElementById('carouselCounter');
         const carouselPrev = document.getElementById('carouselPrev');
         const carouselNext = document.getElementById('carouselNext');
+
+        let currentIndex = 0;
         let currentCarouselImages = [];
         let currentCarouselIndex = 0;
 
-        // 打开全屏轮播 - 全局函数
-        window.openCarousel = function(images, startIndex) {
+        // ============================================================
+        // 全屏轮播功能
+        // ============================================================
+        function openCarousel(images, startIndex) {
             if (!images || images.length === 0) return;
             currentCarouselImages = images;
-            currentCarouselIndex = startIndex;
+            currentCarouselIndex = startIndex || 0;
             updateCarouselDisplay();
             carouselOverlay.classList.add('active');
             document.body.style.overflow = 'hidden';
-        };
+        }
 
-        // 关闭全屏轮播
-        window.closeCarousel = function(event) {
-            if (event && event.target !== carouselOverlay && event.target.tagName !== 'IMG') {
-                return;
-            }
+        function closeCarousel() {
             carouselOverlay.classList.remove('active');
             document.body.style.overflow = '';
-        };
+        }
 
-        // 切换图片
-        window.changeCarousel = function(direction) {
+        function changeCarousel(direction) {
             const len = currentCarouselImages.length;
             if (len === 0) return;
             currentCarouselIndex = (currentCarouselIndex + direction + len) % len;
             updateCarouselDisplay();
-        };
+        }
 
         function updateCarouselDisplay() {
             const len = currentCarouselImages.length;
             if (len === 0) return;
             carouselImage.src = currentCarouselImages[currentCarouselIndex];
-            carouselCounter.textContent = `${currentCarouselIndex + 1} / ${len}`;
+            carouselCounter.textContent = (currentCarouselIndex + 1) + ' / ' + len;
             carouselPrev.classList.toggle('hidden', len <= 1);
             carouselNext.classList.toggle('hidden', len <= 1);
         }
@@ -655,12 +650,20 @@
         // 键盘控制
         document.addEventListener('keydown', function(e) {
             if (!carouselOverlay.classList.contains('active')) return;
-            if (e.key === 'Escape') closeCarousel();
-            else if (e.key === 'ArrowLeft') { e.preventDefault(); changeCarousel(-1); }
-            else if (e.key === 'ArrowRight') { e.preventDefault(); changeCarousel(1); }
+            if (e.key === 'Escape') {
+                closeCarousel();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                changeCarousel(-1);
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                changeCarousel(1);
+            }
         });
 
-        // ===== 渲染作品列表 =====
+        // ============================================================
+        // 渲染作品列表
+        // ============================================================
         function renderWorkList() {
             workList.innerHTML = '';
             worksData.forEach((work, index) => {
@@ -668,9 +671,9 @@
                 btn.textContent = work.name;
                 btn.classList.add('work-btn');
                 if (index === currentIndex) btn.classList.add('active');
-                btn.addEventListener('click', () => {
+                btn.addEventListener('click', function() {
                     currentIndex = index;
-                    document.querySelectorAll('.work-btn').forEach((b, i) => {
+                    document.querySelectorAll('.work-btn').forEach(function(b, i) {
                         b.classList.toggle('active', i === index);
                     });
                     renderWorkDetail(index);
@@ -679,7 +682,9 @@
             });
         }
 
-        // ===== 设置自动滚动（无暂停按钮） =====
+        // ============================================================
+        // 设置自动滚动
+        // ============================================================
         function setupAutoScroll(container) {
             const track = container.querySelector('.gallery-track');
             if (!track) return;
@@ -689,76 +694,94 @@
             track.style.animationDuration = duration + 's';
 
             // 鼠标悬停暂停
-            track.addEventListener('mouseenter', () => {
+            track.addEventListener('mouseenter', function() {
                 track.style.animationPlayState = 'paused';
             });
-            track.addEventListener('mouseleave', () => {
+            track.addEventListener('mouseleave', function() {
                 track.style.animationPlayState = 'running';
             });
 
-            // 触屏支持：触摸时暂停
-            track.addEventListener('touchstart', () => {
+            // 触屏支持
+            track.addEventListener('touchstart', function() {
                 track.style.animationPlayState = 'paused';
             });
-            track.addEventListener('touchend', () => {
+            track.addEventListener('touchend', function() {
                 track.style.animationPlayState = 'running';
             });
         }
 
-        // ===== 渲染作品详情 =====
+        // ============================================================
+        // 渲染作品详情
+        // ============================================================
         function renderWorkDetail(index) {
             const work = worksData[index];
-            let html = `<div class="work-title">${work.name}</div>`;
-            html += `<p style="margin-bottom:20px; color:#555;">${work.description}</p>`;
+            let html = '<div class="work-title">' + work.name + '</div>';
+            html += '<p style="margin-bottom:20px; color:#555;">' + work.description + '</p>';
 
             // 图片轮播
             if (work.images && work.images.length > 0) {
-                html += `<div class="gallery-carousel">`;
-                html += `<div class="gallery-track">`;
+                html += '<div class="gallery-carousel">';
+                html += '<div class="gallery-track">';
+
                 // 复制两份实现无缝循环
-                const doubled = [...work.images, ...work.images];
-                doubled.forEach((img, i) => {
+                const doubled = work.images.concat(work.images);
+                doubled.forEach(function(img, i) {
                     const originalIndex = i % work.images.length;
-                    // 使用 onclick 调用全局函数 openCarousel
-                    html += `<div class="gallery-item" onclick="openCarousel(${JSON.stringify(work.images)}, ${originalIndex})">`;
-                    html += `<img src="${img}" alt="${work.name}" loading="lazy">`;
-                    html += `</div>`;
+                    html += '<div class="gallery-item" data-index="' + originalIndex + '">';
+                    html += '<img src="' + img + '" alt="' + work.name + '" loading="lazy">';
+                    html += '</div>';
                 });
-                html += `</div>`;
-                html += `<div class="scroll-hint"><span>🖱 悬停暂停 · 点击查看大图</span></div>`;
-                html += `</div>`;
+
+                html += '</div>';
+                html += '<div class="scroll-hint"><span>🖱 悬停暂停 · 点击查看大图</span></div>';
+                html += '</div>';
             } else {
-                html += `<p style="color:#999; margin-bottom:20px;">（暂无图片）</p>`;
+                html += '<p style="color:#999; margin-bottom:20px;">（暂无图片）</p>';
             }
 
             // 视频
             if (work.video && work.video.trim() !== '') {
-                html += `<div class="video-wrapper">`;
-                html += `<div class="video-container">`;
-                html += `<iframe src="${work.video}" allowfullscreen></iframe>`;
-                html += `</div>`;
-                html += `</div>`;
+                html += '<div class="video-wrapper">';
+                html += '<div class="video-container">';
+                html += '<iframe src="' + work.video + '" allowfullscreen></iframe>';
+                html += '</div>';
+                html += '</div>';
             } else {
-                html += `<div class="no-video">📹 暂无视频</div>`;
+                html += '<div class="no-video">📹 暂无视频</div>';
             }
 
             workDetail.innerHTML = html;
 
+            // 设置自动滚动
             const carousel = document.querySelector('.gallery-carousel');
             if (carousel) setupAutoScroll(carousel);
+
+            // 绑定图片点击事件（修复后的代码）
+            const galleryItems = document.querySelectorAll('.gallery-item');
+            galleryItems.forEach(function(item) {
+                item.addEventListener('click', function() {
+                    const imgIndex = parseInt(this.getAttribute('data-index'), 10);
+                    openCarousel(work.images, imgIndex);
+                });
+            });
         }
 
-        // ===== 移动端菜单 =====
+        // ============================================================
+        // 移动端菜单
+        // ============================================================
         function toggleMenu() {
             document.getElementById('navLinks').classList.toggle('active');
         }
-        document.querySelectorAll('.nav-links a').forEach(link => {
-            link.addEventListener('click', () => {
+
+        document.querySelectorAll('.nav-links a').forEach(function(link) {
+            link.addEventListener('click', function() {
                 document.getElementById('navLinks').classList.remove('active');
             });
         });
 
-        // ===== 初始化 =====
+        // ============================================================
+        // 初始化
+        // ============================================================
         renderWorkList();
         renderWorkDetail(0);
     </script>
