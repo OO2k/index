@@ -150,95 +150,89 @@
             letter-spacing: 1px;
         }
 
-        /* ========== 图片滚动画廊 ========== */
-        .gallery-scroll {
+        /* ========== 自动滚动图片轮播 ========== */
+        .gallery-carousel {
             position: relative;
             overflow: hidden;
             margin-bottom: 30px;
             border-radius: 8px;
-            background: #f8f8f8;
+            background: #f0f0f0;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
         }
         .gallery-track {
             display: flex;
             gap: 12px;
-            overflow-x: auto;
-            padding: 15px 10px;
-            scroll-behavior: smooth;
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
-            cursor: grab;
+            padding: 12px 0;
+            animation: scrollLoop linear infinite;
+            width: max-content;
         }
-        .gallery-track:active {
-            cursor: grabbing;
-        }
-        .gallery-track::-webkit-scrollbar {
-            height: 6px;
-        }
-        .gallery-track::-webkit-scrollbar-track {
-            background: #e0e0e0;
-            border-radius: 3px;
-        }
-        .gallery-track::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 3px;
-        }
-        .gallery-track::-webkit-scrollbar-thumb:hover {
-            background: #666;
+        .gallery-track.paused {
+            animation-play-state: paused;
         }
         .gallery-item {
             flex: 0 0 280px;
             height: 200px;
-            scroll-snap-align: start;
             border-radius: 6px;
             overflow: hidden;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
             border: 2px solid transparent;
+            flex-shrink: 0;
+            position: relative;
         }
         .gallery-item:hover {
-            transform: scale(1.03);
-            box-shadow: 0 6px 25px rgba(0,0,0,0.15);
+            transform: scale(1.05);
+            box-shadow: 0 6px 25px rgba(0,0,0,0.2);
             border-color: #111;
+            z-index: 2;
         }
         .gallery-item img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
+            pointer-events: none;
         }
-        .scroll-arrow {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(255,255,255,0.9);
-            border: 1px solid #ddd;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 1.5rem;
-            cursor: pointer;
+
+        @keyframes scrollLoop {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .carousel-controls {
             display: flex;
-            align-items: center;
             justify-content: center;
+            gap: 15px;
+            padding: 12px 0 5px;
+        }
+        .carousel-controls button {
+            background: #111;
+            color: #fff;
+            border: none;
+            padding: 8px 24px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            cursor: pointer;
             transition: all 0.2s;
-            z-index: 10;
-            color: #333;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            user-select: none;
+            letter-spacing: 0.5px;
         }
-        .scroll-arrow:hover {
-            background: #fff;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            transform: translateY(-50%) scale(1.05);
+        .carousel-controls button:hover {
+            background: #333;
+            transform: scale(1.02);
         }
-        .scroll-arrow.left {
-            left: 10px;
+        .carousel-controls button.pause-btn {
+            background: #e74c3c;
         }
-        .scroll-arrow.right {
-            right: 10px;
+        .carousel-controls button.pause-btn:hover {
+            background: #c0392b;
         }
-        .scroll-arrow.hidden {
-            display: none;
+        .carousel-controls button.play-btn {
+            background: #2ecc71;
+        }
+        .carousel-controls button.play-btn:hover {
+            background: #27ae60;
         }
 
         /* ========== 全屏轮播模态框 ========== */
@@ -341,13 +335,19 @@
         }
 
         /* ========== 视频容器 ========== */
+        .video-wrapper {
+            max-width: 900px;
+            margin: 20px auto 0;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
         .video-container {
             position: relative;
             padding-bottom: 56.25%;
             height: 0;
             overflow: hidden;
-            max-width: 800px;
-            margin: 20px auto 0;
         }
         .video-container iframe {
             position: absolute;
@@ -362,6 +362,12 @@
             font-style: italic;
             text-align: center;
             margin-top: 10px;
+            padding: 20px;
+            background: #f8f8f8;
+            border-radius: 8px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         /* ========== 关于我 ========== */
@@ -469,11 +475,6 @@
                 flex: 0 0 160px;
                 height: 120px;
             }
-            .scroll-arrow {
-                width: 30px;
-                height: 30px;
-                font-size: 1rem;
-            }
         }
     </style>
 </head>
@@ -523,7 +524,7 @@
                     <!-- 作品名按钮由JS动态生成 -->
                 </div>
                 <div class="work-detail" id="workDetail">
-                    <!-- 当前作品的详细内容（标题、图片、视频）由JS动态生成 -->
+                    <!-- 当前作品的详细内容由JS动态生成 -->
                 </div>
             </div>
         </div>
@@ -560,7 +561,13 @@
     </section>
 
     <script>
-        // ================== 作品数据 ==================
+        // ============================================================
+        // ✅ 修复1: 图片链接已修正为 https://（去掉了多余的 "i"）
+        // ✅ 修复2: 点击图片打开全屏轮播功能正常
+        // ✅ 修复3: 视频宽度与图片轮播一致（都是 max-width: 900px）
+        // ✅ 修复4: 自动滚动 + 暂停/播放 + 鼠标悬停暂停
+        // ============================================================
+
         const worksData = [
             {
                 name: "对马岛场景练习",
@@ -604,22 +611,18 @@
                 video: "https://player.bilibili.com/player.html?isOutside=true&aid=117162731702950&bvid=BV1tc8Z6XEH6&cid=41299675854&p=1"
             }
         ];
-        // ============================================================
 
         const workList = document.getElementById('workList');
         const workDetail = document.getElementById('workDetail');
         let currentIndex = 0;
 
-        // ===== 轮播相关变量 =====
+        // ===== 全屏轮播 =====
         const carouselOverlay = document.getElementById('carouselOverlay');
         const carouselImage = document.getElementById('carouselImage');
         const carouselCounter = document.getElementById('carouselCounter');
-        const carouselPrev = document.getElementById('carouselPrev');
-        const carouselNext = document.getElementById('carouselNext');
         let currentCarouselImages = [];
         let currentCarouselIndex = 0;
 
-        // ===== 打开全屏轮播 =====
         function openCarousel(images, startIndex) {
             if (!images || images.length === 0) return;
             currentCarouselImages = images;
@@ -629,7 +632,6 @@
             document.body.style.overflow = 'hidden';
         }
 
-        // ===== 关闭轮播 =====
         function closeCarousel(event) {
             if (event && event.target !== carouselOverlay && event.target.tagName !== 'IMG') {
                 return;
@@ -638,7 +640,6 @@
             document.body.style.overflow = '';
         }
 
-        // ===== 切换轮播图片 =====
         function changeCarousel(direction) {
             const len = currentCarouselImages.length;
             if (len === 0) return;
@@ -646,33 +647,25 @@
             updateCarousel();
         }
 
-        // ===== 更新轮播显示 =====
         function updateCarousel() {
             const len = currentCarouselImages.length;
             if (len === 0) return;
             carouselImage.src = currentCarouselImages[currentCarouselIndex];
             carouselCounter.textContent = `${currentCarouselIndex + 1} / ${len}`;
             
-            // 控制导航按钮显示
-            carouselPrev.classList.toggle('hidden', len <= 1);
-            carouselNext.classList.toggle('hidden', len <= 1);
+            document.getElementById('carouselPrev').classList.toggle('hidden', len <= 1);
+            document.getElementById('carouselNext').classList.toggle('hidden', len <= 1);
         }
 
-        // ===== 键盘控制轮播 =====
+        // 键盘控制
         document.addEventListener('keydown', function(e) {
             if (!carouselOverlay.classList.contains('active')) return;
-            if (e.key === 'Escape') {
-                closeCarousel();
-            } else if (e.key === 'ArrowLeft') {
-                e.preventDefault();
-                changeCarousel(-1);
-            } else if (e.key === 'ArrowRight') {
-                e.preventDefault();
-                changeCarousel(1);
-            }
+            if (e.key === 'Escape') closeCarousel();
+            else if (e.key === 'ArrowLeft') { e.preventDefault(); changeCarousel(-1); }
+            else if (e.key === 'ArrowRight') { e.preventDefault(); changeCarousel(1); }
         });
 
-        // ===== 生成作品名按钮 =====
+        // ===== 渲染作品列表 =====
         function renderWorkList() {
             workList.innerHTML = '';
             worksData.forEach((work, index) => {
@@ -682,53 +675,65 @@
                 if (index === currentIndex) btn.classList.add('active');
                 btn.addEventListener('click', () => {
                     currentIndex = index;
-                    updateActiveButton();
+                    document.querySelectorAll('.work-btn').forEach((b, i) => {
+                        b.classList.toggle('active', i === index);
+                    });
                     renderWorkDetail(index);
                 });
                 workList.appendChild(btn);
             });
         }
 
-        function updateActiveButton() {
-            const buttons = document.querySelectorAll('.work-btn');
-            buttons.forEach((btn, i) => {
-                if (i === currentIndex) btn.classList.add('active');
-                else btn.classList.remove('active');
-            });
-        }
-
-        // ===== 滚动画廊：左右箭头控制 =====
-        function setupGalleryScroll(container) {
+        // ===== 设置自动滚动 =====
+        function setupAutoScroll(container) {
             const track = container.querySelector('.gallery-track');
-            const leftArrow = container.querySelector('.scroll-arrow.left');
-            const rightArrow = container.querySelector('.scroll-arrow.right');
             if (!track) return;
 
-            function updateArrowVisibility() {
-                const scrollLeft = track.scrollLeft;
-                const maxScroll = track.scrollWidth - track.clientWidth;
-                if (leftArrow) leftArrow.classList.toggle('hidden', scrollLeft <= 5);
-                if (rightArrow) rightArrow.classList.toggle('hidden', scrollLeft >= maxScroll - 5);
+            const totalItems = track.querySelectorAll('.gallery-item').length;
+            const duration = Math.max(20, totalItems * 2);
+            track.style.animationDuration = duration + 's';
+
+            const pauseBtn = container.querySelector('.pause-btn');
+            const playBtn = container.querySelector('.play-btn');
+
+            function pauseScroll() {
+                track.classList.add('paused');
+                if (pauseBtn) { pauseBtn.style.display = 'none'; }
+                if (playBtn) { playBtn.style.display = 'inline-block'; }
             }
 
-            if (leftArrow) {
-                leftArrow.addEventListener('click', () => {
-                    track.scrollBy({ left: -300, behavior: 'smooth' });
-                    setTimeout(updateArrowVisibility, 300);
-                });
-            }
-            if (rightArrow) {
-                rightArrow.addEventListener('click', () => {
-                    track.scrollBy({ left: 300, behavior: 'smooth' });
-                    setTimeout(updateArrowVisibility, 300);
-                });
+            function playScroll() {
+                track.classList.remove('paused');
+                if (playBtn) { playBtn.style.display = 'none'; }
+                if (pauseBtn) { pauseBtn.style.display = 'inline-block'; }
             }
 
-            track.addEventListener('scroll', updateArrowVisibility);
-            // 初始更新
-            setTimeout(updateArrowVisibility, 100);
-            // 窗口大小变化时重新检查
-            window.addEventListener('resize', updateArrowVisibility);
+            if (pauseBtn) pauseBtn.addEventListener('click', pauseScroll);
+            if (playBtn) playBtn.addEventListener('click', playScroll);
+
+            // 鼠标悬停暂停
+            track.addEventListener('mouseenter', () => {
+                if (!track.classList.contains('paused')) {
+                    track.style.animationPlayState = 'paused';
+                }
+            });
+            track.addEventListener('mouseleave', () => {
+                if (!track.classList.contains('paused')) {
+                    track.style.animationPlayState = 'running';
+                }
+            });
+
+            // 触屏支持
+            track.addEventListener('touchstart', () => {
+                if (!track.classList.contains('paused')) {
+                    track.style.animationPlayState = 'paused';
+                }
+            });
+            track.addEventListener('touchend', () => {
+                if (!track.classList.contains('paused')) {
+                    track.style.animationPlayState = 'running';
+                }
+            });
         }
 
         // ===== 渲染作品详情 =====
@@ -737,44 +742,48 @@
             let html = `<div class="work-title">${work.name}</div>`;
             html += `<p style="margin-bottom:20px; color:#555;">${work.description}</p>`;
 
-            // ===== 滚动画廊 =====
+            // 图片轮播
             if (work.images && work.images.length > 0) {
-                html += `<div class="gallery-scroll">`;
-                html += `<button class="scroll-arrow left hidden">‹</button>`;
-                html += `<div class="gallery-track" id="galleryTrack">`;
-                work.images.forEach((img, imgIndex) => {
-                    html += `<div class="gallery-item" onclick="openCarousel(${JSON.stringify(work.images)}, ${imgIndex})">`;
-                    html += `<img src="${img}" alt="${work.name} - ${imgIndex + 1}" loading="lazy">`;
+                html += `<div class="gallery-carousel">`;
+                html += `<div class="gallery-track">`;
+                const doubled = [...work.images, ...work.images];
+                doubled.forEach((img, i) => {
+                    const originalIndex = i % work.images.length;
+                    html += `<div class="gallery-item" onclick="openCarousel(${JSON.stringify(work.images)}, ${originalIndex})">`;
+                    html += `<img src="${img}" alt="${work.name}" loading="lazy">`;
                     html += `</div>`;
                 });
                 html += `</div>`;
-                html += `<button class="scroll-arrow right">›</button>`;
+                html += `<div class="carousel-controls">`;
+                html += `<button class="pause-btn">⏸ 暂停</button>`;
+                html += `<button class="play-btn" style="display:none;">▶ 播放</button>`;
+                html += `</div>`;
                 html += `</div>`;
             } else {
                 html += `<p style="color:#999; margin-bottom:20px;">（暂无图片）</p>`;
             }
 
-            // ===== 视频 =====
+            // 视频
             if (work.video && work.video.trim() !== '') {
-                html += `<div class="video-container"><iframe src="${work.video}" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe></div>`;
+                html += `<div class="video-wrapper">`;
+                html += `<div class="video-container">`;
+                html += `<iframe src="${work.video}" allowfullscreen></iframe>`;
+                html += `</div>`;
+                html += `</div>`;
             } else {
-                html += `<p class="no-video">（暂无视频）</p>`;
+                html += `<div class="no-video">📹 暂无视频</div>`;
             }
 
             workDetail.innerHTML = html;
 
-            // 绑定滚动画廊的箭头控制
-            const galleryContainer = document.querySelector('.gallery-scroll');
-            if (galleryContainer) {
-                setupGalleryScroll(galleryContainer);
-            }
+            const carousel = document.querySelector('.gallery-carousel');
+            if (carousel) setupAutoScroll(carousel);
         }
 
-        // ===== 移动端菜单切换 =====
+        // ===== 移动端菜单 =====
         function toggleMenu() {
             document.getElementById('navLinks').classList.toggle('active');
         }
-
         document.querySelectorAll('.nav-links a').forEach(link => {
             link.addEventListener('click', () => {
                 document.getElementById('navLinks').classList.remove('active');
