@@ -756,7 +756,7 @@
             const carousel = document.querySelector('.gallery-carousel');
             if (carousel) setupAutoScroll(carousel);
 
-            // 绑定图片点击事件（修复后的代码）
+            // 绑定图片点击事件（使用事件监听，修复点击无效问题）
             const galleryItems = document.querySelectorAll('.gallery-item');
             galleryItems.forEach(function(item) {
                 item.addEventListener('click', function() {
